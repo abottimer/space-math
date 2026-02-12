@@ -163,6 +163,7 @@ body {
     align-items: center;
     gap: 8px;
     flex: 1;
+    position: relative; /* For rocket positioning */
     justify-content: space-evenly;
     padding: 10px 0;
 }
@@ -486,6 +487,31 @@ body {
 
 .tile.dragging {
     opacity: 0.5;
+}
+
+/* Floating drag clone */
+.drag-clone {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    background: var(--tile-blue);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    pointer-events: none;
+    z-index: 1000;
+    transform: translate(-50%, -50%) scale(1.2);
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5);
+    animation: dragFloat 0.15s ease-out;
+}
+
+@keyframes dragFloat {
+    from { transform: translate(-50%, -50%) scale(1); }
+    to { transform: translate(-50%, -50%) scale(1.2); }
 }
 
 .action-tile {

@@ -179,13 +179,24 @@ function setupEventListeners() {
     elements.startBtn.addEventListener('click', startGame);
     elements.playAgainBtn.addEventListener('click', restartGame);
 
-    // Tile drag events
+    // Tile drag events - use custom pointer-based drag system
     elements.tiles.forEach(tile => {
-        tile.addEventListener('dragstart', handleDragStart);
-        tile.addEventListener('dragend', handleDragEnd);
-        // Also allow click to add
-        tile.addEventListener('click', () => handleTileClick(tile.dataset.value));
+        // Pointer events for custom drag
+        tile.addEventListener('pointerdown', handlePointerDown);
+        // Also allow simple click to add (for quick taps)
+        tile.addEventListener('click', (e) => {
+            // Only handle click if we didn't just drag
+            if (!wasDragging) {
+                handleTileClick(tile.dataset.value);
+            }
+            wasDragging = false;
+        });
     });
+
+    // Global pointer events for dragging
+    document.addEventListener('pointermove', handlePointerMove);
+    document.addEventListener('pointerup', handlePointerUp);
+    document.addEventListener('pointercancel', handlePointerUp);
 
     // Backspace and submit
     elements.backspaceBtn.addEventListener('click', handleBackspace);
@@ -230,58 +241,137 @@ function handleKeydown(e) {
     }
 }
 
-// Drag and drop handlers
-let draggedValue = null;
+// Custom pointer-based drag and drop system
+let dragState = {
+    isDragging: false,
+    value: null,
+    clone: null,
+    startX: 0,
+    startY: 0,
+    originTile: null
+};
+let wasDragging = false;
 
-function handleDragStart(e) {
-    draggedValue = e.target.dataset.value;
-    e.target.classList.add('dragging');
-    // Set drag data for proper drag-drop
-    e.dataTransfer.setData('text/plain', draggedValue);
-    e.dataTransfer.effectAllowed = 'copy';
+function handlePointerDown(e) {
+    const tile = e.target.closest('.tile');
+    if (!tile || tile.classList.contains('action-tile')) return;
+    
+    // Prevent default to avoid text selection
+    e.preventDefault();
+    
+    dragState.isDragging = false; // Will become true on move
+    dragState.value = tile.dataset.value;
+    dragState.startX = e.clientX;
+    dragState.startY = e.clientY;
+    dragState.originTile = tile;
+    
+    // Capture pointer for reliable tracking
+    tile.setPointerCapture(e.pointerId);
+    
     sounds.click();
 }
 
-function handleDragEnd(e) {
-    e.target.classList.remove('dragging');
-    // Clear all drag-over states
+function handlePointerMove(e) {
+    if (dragState.value === null) return;
+    
+    const dx = e.clientX - dragState.startX;
+    const dy = e.clientY - dragState.startY;
+    
+    // Start dragging after moving a bit (5px threshold)
+    if (!dragState.isDragging && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+        dragState.isDragging = true;
+        wasDragging = true;
+        
+        // Create floating clone
+        dragState.clone = document.createElement('div');
+        dragState.clone.className = 'drag-clone';
+        dragState.clone.textContent = dragState.value;
+        document.body.appendChild(dragState.clone);
+        
+        // Mark origin as being dragged
+        if (dragState.originTile) {
+            dragState.originTile.classList.add('dragging');
+        }
+    }
+    
+    if (dragState.isDragging && dragState.clone) {
+        // Position clone at cursor
+        dragState.clone.style.left = `${e.clientX}px`;
+        dragState.clone.style.top = `${e.clientY}px`;
+        
+        // Highlight slot under cursor
+        highlightSlotUnderPoint(e.clientX, e.clientY);
+    }
+}
+
+function handlePointerUp(e) {
+    if (dragState.isDragging && dragState.value !== null) {
+        // Find slot under cursor and drop
+        const slot = getSlotUnderPoint(e.clientX, e.clientY);
+        if (slot) {
+            const index = parseInt(slot.dataset.index);
+            placeDigit(index, dragState.value);
+            sounds.drop();
+        }
+    }
+    
+    // Cleanup
+    cleanupDrag();
+}
+
+function highlightSlotUnderPoint(x, y) {
+    // Clear all highlights
     document.querySelectorAll('.answer-slot').forEach(slot => {
         slot.classList.remove('drag-over');
     });
+    
+    // Highlight slot under point
+    const slot = getSlotUnderPoint(x, y);
+    if (slot) {
+        slot.classList.add('drag-over');
+    }
+}
+
+function getSlotUnderPoint(x, y) {
+    const slots = document.querySelectorAll('.answer-slot');
+    for (const slot of slots) {
+        const rect = slot.getBoundingClientRect();
+        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+            return slot;
+        }
+    }
+    return null;
+}
+
+function cleanupDrag() {
+    if (dragState.clone) {
+        dragState.clone.remove();
+    }
+    if (dragState.originTile) {
+        dragState.originTile.classList.remove('dragging');
+    }
+    
+    // Clear all slot highlights
+    document.querySelectorAll('.answer-slot').forEach(slot => {
+        slot.classList.remove('drag-over');
+    });
+    
+    dragState = {
+        isDragging: false,
+        value: null,
+        clone: null,
+        startX: 0,
+        startY: 0,
+        originTile: null
+    };
 }
 
 function setupAnswerSlotListeners() {
     const slots = document.querySelectorAll('.answer-slot');
     slots.forEach((slot, index) => {
-        // Dragover - must prevent default to allow drop
-        slot.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            slot.classList.add('drag-over');
-        });
-
-        slot.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            slot.classList.remove('drag-over');
-        });
-
-        slot.addEventListener('dragenter', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-        });
-
-        slot.addEventListener('drop', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            slot.classList.remove('drag-over');
-            if (draggedValue !== null) {
-                // Place digit in this specific slot (replaces existing)
-                placeDigit(index, draggedValue);
-                sounds.drop();
-                draggedValue = null;
-            }
-        });
-
+        // Store index on slot for easy lookup
+        slot.dataset.index = index;
+        
         // Click on slot to clear it
         slot.addEventListener('click', (e) => {
             if (gameState.answer[index] !== null) {
@@ -412,27 +502,31 @@ function renderPlanetTracker() {
 function positionRocket() {
     const currentPlanet = document.querySelector('#planet-tracker .planet.current');
     const sidebar = document.getElementById('planet-sidebar');
-    if (currentPlanet && sidebar) {
+    const tracker = document.getElementById('planet-tracker');
+    if (currentPlanet && sidebar && tracker) {
         const planetRect = currentPlanet.getBoundingClientRect();
-        const sidebarRect = sidebar.getBoundingClientRect();
-        // Position rocket to the left of the planet, centered vertically
-        elements.rocket.style.left = `${sidebarRect.left - 10}px`;
-        elements.rocket.style.top = `${planetRect.top + planetRect.height/2 - 20}px`;
+        const trackerRect = tracker.getBoundingClientRect();
+        // Position rocket relative to the tracker (inside sidebar)
+        // Rocket should be to the left of the planet, centered vertically
+        const relativeTop = planetRect.top - trackerRect.top + (planetRect.height / 2) - 20;
+        elements.rocket.style.left = '-35px';
+        elements.rocket.style.top = `${relativeTop}px`;
     }
 }
 
 // Animate rocket to new planet (flying up)
 function animateRocketToTarget(targetIndex) {
     const targetPlanet = document.querySelector(`#planet-tracker .planet[data-index="${targetIndex}"]`);
-    const sidebar = document.getElementById('planet-sidebar');
-    if (targetPlanet && sidebar) {
+    const tracker = document.getElementById('planet-tracker');
+    if (targetPlanet && tracker) {
         elements.rocket.classList.add('flying');
         sounds.rocket();
         
         const planetRect = targetPlanet.getBoundingClientRect();
-        const sidebarRect = sidebar.getBoundingClientRect();
-        elements.rocket.style.left = `${sidebarRect.left - 10}px`;
-        elements.rocket.style.top = `${planetRect.top + planetRect.height/2 - 20}px`;
+        const trackerRect = tracker.getBoundingClientRect();
+        const relativeTop = planetRect.top - trackerRect.top + (planetRect.height / 2) - 20;
+        elements.rocket.style.left = '-35px';
+        elements.rocket.style.top = `${relativeTop}px`;
         
         setTimeout(() => {
             elements.rocket.classList.remove('flying');
