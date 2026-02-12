@@ -155,6 +155,7 @@ body {
     padding: 20px 10px;
     z-index: 20;
     border-left: 2px solid rgba(255,255,255,0.1);
+    overflow: visible; /* Allow rocket to show outside */
 }
 
 #planet-tracker {
@@ -164,6 +165,7 @@ body {
     gap: 8px;
     flex: 1;
     position: relative; /* For rocket positioning */
+    overflow: visible; /* Allow rocket to show outside */
     justify-content: space-evenly;
     padding: 10px 0;
 }
@@ -205,12 +207,13 @@ body {
 
 /* Rocket in sidebar */
 #rocket {
-    font-size: 2.5rem;
+    font-size: 2rem;
     position: absolute;
+    left: 5px;
     transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
     filter: drop-shadow(0 0 10px rgba(255, 107, 53, 0.5));
     z-index: 25;
-    transform: rotate(-90deg); /* Point upward */
+    transform: rotate(-90deg); /* Point upward (nose pointing up) */
 }
 
 #rocket.flying {
@@ -696,6 +699,24 @@ body:has(#start-screen:not(.hidden)) #planet-sidebar {
 #start-btn:hover, #play-again-btn:hover {
     background: #ff8c5a;
     transform: scale(1.05);
+}
+
+#reset-btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    background: transparent;
+    color: #888;
+    border: 2px solid #444;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 15px;
+}
+
+#reset-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border-color: #666;
 }
 
 /* Confetti */

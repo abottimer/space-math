@@ -138,6 +138,7 @@ function init() {
         planetFactText: document.getElementById('planet-fact-text'),
         rocket: document.getElementById('rocket'),
         finalStats: document.getElementById('final-stats'),
+        resetBtn: document.getElementById('reset-btn'),
     };
 
     // Create stars background
@@ -178,6 +179,7 @@ function setupEventListeners() {
     // Start game
     elements.startBtn.addEventListener('click', startGame);
     elements.playAgainBtn.addEventListener('click', restartGame);
+    elements.resetBtn.addEventListener('click', resetProgress);
 
     // Tile drag events - use custom pointer-based drag system
     elements.tiles.forEach(tile => {
@@ -502,14 +504,11 @@ function renderPlanetTracker() {
 function positionRocket() {
     const currentPlanet = document.querySelector('#planet-tracker .planet.current');
     const sidebar = document.getElementById('planet-sidebar');
-    const tracker = document.getElementById('planet-tracker');
-    if (currentPlanet && sidebar && tracker) {
+    if (currentPlanet && sidebar) {
         const planetRect = currentPlanet.getBoundingClientRect();
-        const trackerRect = tracker.getBoundingClientRect();
-        // Position rocket relative to the tracker (inside sidebar)
-        // Rocket should be to the left of the planet, centered vertically
-        const relativeTop = planetRect.top - trackerRect.top + (planetRect.height / 2) - 20;
-        elements.rocket.style.left = '-35px';
+        const sidebarRect = sidebar.getBoundingClientRect();
+        // Position rocket to the left of the sidebar, aligned with current planet
+        const relativeTop = planetRect.top - sidebarRect.top + (planetRect.height / 2) - 20;
         elements.rocket.style.top = `${relativeTop}px`;
     }
 }
@@ -517,15 +516,14 @@ function positionRocket() {
 // Animate rocket to new planet (flying up)
 function animateRocketToTarget(targetIndex) {
     const targetPlanet = document.querySelector(`#planet-tracker .planet[data-index="${targetIndex}"]`);
-    const tracker = document.getElementById('planet-tracker');
-    if (targetPlanet && tracker) {
+    const sidebar = document.getElementById('planet-sidebar');
+    if (targetPlanet && sidebar) {
         elements.rocket.classList.add('flying');
         sounds.rocket();
         
         const planetRect = targetPlanet.getBoundingClientRect();
-        const trackerRect = tracker.getBoundingClientRect();
-        const relativeTop = planetRect.top - trackerRect.top + (planetRect.height / 2) - 20;
-        elements.rocket.style.left = '-35px';
+        const sidebarRect = sidebar.getBoundingClientRect();
+        const relativeTop = planetRect.top - sidebarRect.top + (planetRect.height / 2) - 20;
         elements.rocket.style.top = `${relativeTop}px`;
         
         setTimeout(() => {
@@ -888,6 +886,26 @@ function restartGame() {
     generateProblem();
     
     saveState();
+}
+
+// Reset all progress (clear localStorage)
+function resetProgress() {
+    localStorage.removeItem('spaceMathState');
+    gameState = {
+        pilotName: 'Austin',
+        currentPlanetIndex: 0,
+        score: 0,
+        streak: 0,
+        problemsOnPlanet: 0,
+        problemsNeededToAdvance: 3,
+        currentProblem: null,
+        answer: [],
+        carries: [],
+    };
+    elements.pilotNameInput.value = gameState.pilotName;
+    renderPlanetTracker();
+    positionRocket();
+    alert('Progress reset! Starting fresh from Pluto 🪐');
 }
 
 // Save state to localStorage
