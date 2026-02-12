@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Space Math Mission</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Stars background -->
+        <div id="stars"></div>
+        
+        <!-- Header with progress -->
+        <header id="header">
+            <div id="mission-title">🚀 Space Math Mission</div>
+            <div id="progress-container">
+                <div id="planet-tracker">
+                    <!-- Planets will be rendered by JS -->
+                </div>
+                <div id="current-location">
+                    <span id="current-planet-emoji">🪐</span>
+                    <span id="current-planet-name">Pluto</span>
+                </div>
+                <!-- Progress bar for current planet -->
+                <div id="planet-progress">
+                    <div id="planet-progress-bar"></div>
+                    <span id="planet-progress-text">0/3</span>
+                </div>
+            </div>
+            <div id="stats">
+                <span id="streak">🔥 0</span>
+                <span id="score">⭐ 0</span>
+            </div>
+        </header>
+
+        <!-- Main game area -->
+        <main id="game-area">
+            <!-- Problem display with scratchpad overlay -->
+            <div id="problem-wrapper">
+                <!-- Scratchpad tools above the problem -->
+                <div id="scratchpad-tools">
+                    <span>✏️</span>
+                    <button class="color-btn active" data-color="#ffff00" style="background: #ffff00;" title="Yellow"></button>
+                    <button class="color-btn" data-color="#ff69b4" style="background: #ff69b4;" title="Pink"></button>
+                    <button class="color-btn" data-color="#00ffff" style="background: #00ffff;" title="Cyan"></button>
+                    <button class="color-btn" data-color="#90EE90" style="background: #90EE90;" title="Green"></button>
+                    <button id="clear-canvas" title="Clear">🗑️</button>
+                </div>
+                
+                <div id="problem-container">
+                    <div id="carry-row">
+                        <!-- Carry slots rendered by JS -->
+                    </div>
+                    <div id="number1-row" class="number-row">
+                        <!-- First number digits -->
+                    </div>
+                    <div id="operator-row">
+                        <span id="operator">+</span>
+                    </div>
+                    <div id="number2-row" class="number-row">
+                        <!-- Second number digits -->
+                    </div>
+                    <div id="line-row">
+                        <div class="problem-line"></div>
+                    </div>
+                    <div id="answer-row">
+                        <!-- Answer slots (drop targets) -->
+                    </div>
+                    
+                    <!-- Canvas overlays the problem for annotations -->
+                    <canvas id="scratchpad"></canvas>
+                </div>
+            </div>
+        </main>
+
+        <!-- Number tiles (drag source) -->
+        <div id="number-tiles">
+            <div class="tile" draggable="true" data-value="0">0</div>
+            <div class="tile" draggable="true" data-value="1">1</div>
+            <div class="tile" draggable="true" data-value="2">2</div>
+            <div class="tile" draggable="true" data-value="3">3</div>
+            <div class="tile" draggable="true" data-value="4">4</div>
+            <div class="tile" draggable="true" data-value="5">5</div>
+            <div class="tile" draggable="true" data-value="6">6</div>
+            <div class="tile" draggable="true" data-value="7">7</div>
+            <div class="tile" draggable="true" data-value="8">8</div>
+            <div class="tile" draggable="true" data-value="9">9</div>
+            <div class="tile action-tile" id="backspace-btn" title="Remove last">⌫</div>
+            <div class="tile action-tile submit-tile" id="submit-btn" title="Check answer">✓</div>
+        </div>
+
+        <!-- Rocket (animated) -->
+        <div id="rocket">🚀</div>
+
+        <!-- Feedback overlay -->
+        <div id="feedback" class="hidden">
+            <div id="feedback-content">
+                <div id="feedback-emoji"></div>
+                <div id="feedback-text"></div>
+            </div>
+        </div>
+
+        <!-- Planet fact popup -->
+        <div id="planet-fact" class="hidden">
+            <div id="planet-fact-content">
+                <div id="planet-fact-emoji"></div>
+                <div id="planet-fact-title"></div>
+                <div id="planet-fact-text"></div>
+            </div>
+        </div>
+
+        <!-- Victory screen -->
+        <div id="victory-screen" class="hidden">
+            <div id="victory-content">
+                <h1>🌟 MISSION COMPLETE! 🌟</h1>
+                <p>You reached the Sun!</p>
+                <div id="final-stats"></div>
+                <button id="play-again-btn">🚀 New Mission</button>
+            </div>
+        </div>
+
+        <!-- Start screen -->
+        <div id="start-screen">
+            <div id="start-content">
+                <h1>🚀 Space Math Mission</h1>
+                <p>Travel from Pluto to the Sun!</p>
+                <p class="subtitle">Solve math problems to power your rocket</p>
+                <div id="pilot-name-container">
+                    <label for="pilot-name">Pilot Name:</label>
+                    <input type="text" id="pilot-name" placeholder="Austin" value="Austin">
+                </div>
+                <button id="start-btn">🚀 Launch Mission!</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="sounds.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
