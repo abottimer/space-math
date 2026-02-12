@@ -226,37 +226,60 @@ let draggedValue = null;
 function handleDragStart(e) {
     draggedValue = e.target.dataset.value;
     e.target.classList.add('dragging');
+    // Set drag data for proper drag-drop
+    e.dataTransfer.setData('text/plain', draggedValue);
+    e.dataTransfer.effectAllowed = 'copy';
     sounds.click();
 }
 
 function handleDragEnd(e) {
     e.target.classList.remove('dragging');
+    // Clear all drag-over states
+    document.querySelectorAll('.answer-slot').forEach(slot => {
+        slot.classList.remove('drag-over');
+    });
 }
 
 function setupAnswerSlotListeners() {
     const slots = document.querySelectorAll('.answer-slot');
     slots.forEach((slot, index) => {
+        // Dragover - must prevent default to allow drop
         slot.addEventListener('dragover', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             slot.classList.add('drag-over');
         });
 
-        slot.addEventListener('dragleave', () => {
+        slot.addEventListener('dragleave', (e) => {
+            e.preventDefault();
             slot.classList.remove('drag-over');
+        });
+
+        slot.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
         });
 
         slot.addEventListener('drop', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             slot.classList.remove('drag-over');
             if (draggedValue !== null) {
+                // Place digit in this specific slot (replaces existing)
                 placeDigit(index, draggedValue);
                 sounds.drop();
+                draggedValue = null;
             }
         });
 
-        // Click to select slot
-        slot.addEventListener('click', () => {
-            selectSlot(index);
+        // Click on slot to clear it
+        slot.addEventListener('click', (e) => {
+            if (gameState.answer[index] !== null) {
+                // Clear this slot
+                gameState.answer[index] = null;
+                sounds.remove();
+                renderAnswer();
+            }
         });
     });
 }
@@ -375,30 +398,35 @@ function renderPlanetTracker() {
     }).join('');
 }
 
-// Position rocket at current planet
+// Position rocket at current planet (vertical sidebar - rocket flies up)
 function positionRocket() {
     const currentPlanet = document.querySelector('#planet-tracker .planet.current');
-    if (currentPlanet) {
-        const rect = currentPlanet.getBoundingClientRect();
-        elements.rocket.style.left = `${rect.left - 25}px`;
-        elements.rocket.style.top = `${rect.bottom + 5}px`;
+    const sidebar = document.getElementById('planet-sidebar');
+    if (currentPlanet && sidebar) {
+        const planetRect = currentPlanet.getBoundingClientRect();
+        const sidebarRect = sidebar.getBoundingClientRect();
+        // Position rocket to the left of the planet, centered vertically
+        elements.rocket.style.left = `${sidebarRect.left - 10}px`;
+        elements.rocket.style.top = `${planetRect.top + planetRect.height/2 - 20}px`;
     }
 }
 
-// Animate rocket to new planet
+// Animate rocket to new planet (flying up)
 function animateRocketToTarget(targetIndex) {
     const targetPlanet = document.querySelector(`#planet-tracker .planet[data-index="${targetIndex}"]`);
-    if (targetPlanet) {
+    const sidebar = document.getElementById('planet-sidebar');
+    if (targetPlanet && sidebar) {
         elements.rocket.classList.add('flying');
         sounds.rocket();
         
-        const rect = targetPlanet.getBoundingClientRect();
-        elements.rocket.style.left = `${rect.left - 25}px`;
-        elements.rocket.style.top = `${rect.bottom + 5}px`;
+        const planetRect = targetPlanet.getBoundingClientRect();
+        const sidebarRect = sidebar.getBoundingClientRect();
+        elements.rocket.style.left = `${sidebarRect.left - 10}px`;
+        elements.rocket.style.top = `${planetRect.top + planetRect.height/2 - 20}px`;
         
         setTimeout(() => {
             elements.rocket.classList.remove('flying');
-        }, 1500);
+        }, 1000);
     }
 }
 

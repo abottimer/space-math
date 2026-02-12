@@ -11,18 +11,12 @@
         <!-- Stars background -->
         <div id="stars"></div>
         
-        <!-- Header with progress -->
+        <!-- Header with stats -->
         <header id="header">
             <div id="mission-title">🚀 Space Math Mission</div>
-            <div id="progress-container">
-                <div id="planet-tracker">
-                    <!-- Planets will be rendered by JS -->
-                </div>
-                <div id="current-location">
-                    <span id="current-planet-emoji">🪐</span>
-                    <span id="current-planet-name">Pluto</span>
-                </div>
-                <!-- Progress bar for current planet -->
+            <div id="current-location">
+                <span id="current-planet-emoji"></span>
+                <span id="current-planet-name">Pluto</span>
                 <div id="planet-progress">
                     <div id="planet-progress-bar"></div>
                     <span id="planet-progress-text">0/3</span>
@@ -33,6 +27,14 @@
                 <span id="score">⭐ 0</span>
             </div>
         </header>
+
+        <!-- Vertical planet tracker on right side -->
+        <div id="planet-sidebar">
+            <div id="planet-tracker">
+                <!-- Planets will be rendered by JS (bottom to top: Pluto -> Sun) -->
+            </div>
+            <div id="rocket">🚀</div>
+        </div>
 
         <!-- Main game area -->
         <main id="game-area">
@@ -89,9 +91,6 @@
             <div class="tile action-tile" id="backspace-btn" title="Remove last">⌫</div>
             <div class="tile action-tile submit-tile" id="submit-btn" title="Check answer">✓</div>
         </div>
-
-        <!-- Rocket (animated) -->
-        <div id="rocket">🚀</div>
 
         <!-- Feedback overlay -->
         <div id="feedback" class="hidden">
