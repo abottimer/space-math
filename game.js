@@ -5,70 +5,80 @@
 const PLANETS = [
     { 
         name: 'Pluto', 
-        emoji: '🪐', 
+        emoji: '🪐',
+        image: 'assets/planets/pluto.png',
         difficulty: 'single', 
         maxNum: 9,
         fact: "Pluto is smaller than Earth's Moon! It was discovered in 1930."
     },
     { 
         name: 'Neptune', 
-        emoji: '🔵', 
+        emoji: '🔵',
+        image: 'assets/planets/neptune.png',
         difficulty: 'single', 
         maxNum: 9,
         fact: "Neptune has the strongest winds in the solar system — up to 1,200 mph!"
     },
     { 
         name: 'Uranus', 
-        emoji: '💎', 
+        emoji: '💎',
+        image: 'assets/planets/uranus.png',
         difficulty: 'double', 
         maxNum: 99,
         fact: "Uranus rotates on its side like a rolling ball! It's the only planet that does this."
     },
     { 
         name: 'Saturn', 
-        emoji: '🪐', 
+        emoji: '🪐',
+        image: 'assets/planets/saturn.png',
         difficulty: 'double', 
         maxNum: 99,
         fact: "Saturn's rings are made of ice and rock. You could fit 764 Earths inside Saturn!"
     },
     { 
         name: 'Jupiter', 
-        emoji: '🟠', 
+        emoji: '🟠',
+        image: 'assets/planets/jupiter.png',
         difficulty: 'triple', 
         maxNum: 999,
         fact: "Jupiter is so big that all the other planets could fit inside it! It has 95 moons."
     },
     { 
         name: 'Mars', 
-        emoji: '🔴', 
+        emoji: '🔴',
+        image: 'assets/planets/mars.png',
         difficulty: 'triple', 
         maxNum: 999,
         fact: "Mars has the tallest volcano in the solar system — Olympus Mons is 3x taller than Mt. Everest!"
     },
     { 
         name: 'Earth', 
-        emoji: '🌍', 
+        emoji: '🌍',
+        image: 'assets/planets/earth.png',
         difficulty: 'triple', 
         maxNum: 999,
         fact: "You're passing by home! Earth is the only planet we know has life."
     },
     { 
         name: 'Venus', 
-        emoji: '🟡', 
+        emoji: '🟡',
+        image: 'assets/planets/venus.png',
         difficulty: 'quad', 
         maxNum: 9999,
         fact: "A day on Venus is longer than its year! It spins very, very slowly."
     },
     { 
         name: 'Mercury', 
-        emoji: '⚫', 
+        emoji: '⚫',
+        image: 'assets/planets/mercury.png',
         difficulty: 'quad', 
         maxNum: 9999,
         fact: "Mercury is the fastest planet — it zooms around the Sun in just 88 Earth days!"
     },
     { 
         name: 'Sun', 
-        emoji: '☀️', 
+        emoji: '☀️',
+        image: 'assets/planets/sun.png',
         difficulty: 'boss', 
         maxNum: 99999,
         fact: "🏆 BOSS DEFEATED! You conquered the Sun! It's so big that 1.3 million Earths could fit inside!"
@@ -394,7 +404,7 @@ function renderPlanetTracker() {
         let classes = 'planet';
         if (i < gameState.currentPlanetIndex) classes += ' reached';
         if (i === gameState.currentPlanetIndex) classes += ' current';
-        return `<span class="${classes}" title="${planet.name}" data-index="${i}">${planet.emoji}</span>`;
+        return `<span class="${classes}" title="${planet.name}" data-index="${i}"><img src="${planet.image}" alt="${planet.name}"></span>`;
     }).join('');
 }
 
@@ -634,7 +644,7 @@ function showFeedback(emoji, text, success) {
 
 // Show planet fact
 function showPlanetFact(planet) {
-    elements.planetFactEmoji.textContent = planet.emoji;
+    elements.planetFactEmoji.innerHTML = `<img src="${planet.image}" alt="${planet.name}">`;
     elements.planetFactTitle.textContent = `Welcome to ${planet.name}!`;
     elements.planetFactText.textContent = planet.fact;
     elements.planetFact.classList.remove('hidden');
@@ -693,7 +703,7 @@ function advancePlanet() {
 // Update current planet display
 function updateCurrentPlanet() {
     const planet = PLANETS[gameState.currentPlanetIndex];
-    elements.currentPlanetEmoji.textContent = planet.emoji;
+    elements.currentPlanetEmoji.innerHTML = `<img src="${planet.image}" alt="${planet.name}">`;
     elements.currentPlanetName.textContent = planet.name;
 }
 
